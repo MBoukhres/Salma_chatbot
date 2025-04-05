@@ -2,11 +2,25 @@ from flask import Flask, request, jsonify
 import openai
 from flask_cors import CORS
 import os
+import datetime
+import requests
 
 app = Flask(__name__)
 CORS(app)
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFUQqvv6G_19p6J72xMMnOxclpAe16GrG0ZPRdh4y5EyIddtP7Km-pLPG_QQicnI4b/exec"
+
+def send_to_google_sheets(user_msg, bot_reply):
+    try:
+        payload = {
+            "user_message": user_msg,
+            "bot_reply": bot_reply
+        }
+        requests.post(GOOGLE_SCRIPT_URL, json=payload)
+    except Exception as e:
+        print(f"Erreur lors de l'envoi vers Google Sheets : {e}")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -26,12 +40,14 @@ def chat():
                     )
                 },
                 {"role": "user", "content": user_msg}
-            ],  # ✅ virgule ici
+            ],
             temperature=0.7
         )
-        return jsonify({"reply": response.choices[0].message["content"]})
+        bot_reply = response.choices[0].message["content"]
+        send_to_google_sheets(user_msg, bot_reply)
+        return jsonify({"reply": bot_reply})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=3000)
