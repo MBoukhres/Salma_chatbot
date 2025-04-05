@@ -26,8 +26,7 @@ def chat():
                     )
                 },
                 {"role": "user", "content": user_msg}
-            ]
-
+            ],  # ✅ virgule ici
             temperature=0.7
         )
         return jsonify({"reply": response.choices[0].message["content"]})
