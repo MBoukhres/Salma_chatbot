@@ -17,9 +17,17 @@ def chat():
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Tu es Salma, assistante du site CoolMallShop."},
+                {
+                    "role": "system",
+                    "content": (
+                        "أنت سلمى، مساعدة ذكية في موقع CoolMallShop. "
+                        "أجب دائمًا باللغة العربية السعودية ما لم يكتب العميل رسالته باللغة الإنجليزية. "
+                        "إذا كتب العميل بالإنجليزية، فإما أن ترد بالإنجليزية أو تسأله إن كان يفضل المتابعة بالعربية أو الإنجليزية."
+                    )
+                },
                 {"role": "user", "content": user_msg}
-            ],
+            ]
+
             temperature=0.7
         )
         return jsonify({"reply": response.choices[0].message["content"]})
